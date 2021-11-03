@@ -22,7 +22,7 @@ echo "hi"
 # you can use python functions
 # || is return aka \n
 # |?| is tab
-@python def hello_world(args=None):||?|?print("hi")|| print("hola")||hello_world()
+@python def hello_world(args=None):||?|?print("hi")||?|?print("hola")||hello_world()
 # you can get the arguments given comma seperated by:
 echo "*getargs"
 # this only works if the "--sendargs" flag is used.
