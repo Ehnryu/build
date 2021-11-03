@@ -19,7 +19,7 @@ def download(url, filename):
     import shutil
     import requests
     import tqdm
-    
+
     r = requests.get(url, stream=True, allow_redirects=True)
     if r.status_code != 200:
         r.raise_for_status()  # Will only raise for 4xx codes, so...
@@ -109,25 +109,29 @@ def build():
 
     argv = sys.argv[1:]
     opts = []
-    x = False
-    if sys.argv[0] in ["build","build.py","main.py"]:
+    tba = sys.argv[0]
+    for item in ["build","build.py","main.py"]:
+        if item in tba:
+            tba = item
+
+    if tba in ["build","build.py","main.py"]:
       return {"x":"t","args":sys.argv}
     try:
       opts, args = getopt.getopt(argv, "h",advanced)
-    
+
 
     except:
         printc(CRED,"ERROR: Invalid arguments provided.")
         send_help()
 
     for opt, arg in opts:
-        
+
         if opt in ["-h","--help"]:
           send_help()
         if opt in ["--sendargs"]:
           return {"x":"t","args":sys.argv}
 
-          
+
 
 
 
@@ -159,44 +163,113 @@ if x["x"] == "t":
           printc(CBEIGE,f"COMMENT: {item}")
       if item.startswith("#") == False:
         item = item.replace("*getargs",str(argz).rstrip())
+        item = item.replace("*getplatform",str(sys.platform).rstrip())
 
-        if item.endswith(":") and item.startswith("func"):
-          print(CRED,f"Running function {item}")
-          function = item
-          line = 0
+        if item.startswith("@reqOS"):
+            item = item.replace("@reqOS ","")
+            item = item.split(",")
+            if sys.platform not in item:
+                raise RuntimeError(f"OS not supported. RequiredOS: {item} YourOS: {sys.platform}")
+
+        if item.startswith("@uOS"):
+            item = item.replace("@uOS ","")
+            item = item.split(",")
+            if sys.platform in item:
+                raise RuntimeError(f"OS not supported. UnsupportedOS: {item} YourOS: {sys.platform}")
+
+        elif item.startswith("@dl"):
+            url = ""
+            output = ""
+            item = item.replace("@dl ","")
+            item = item.split()
+            for itex in item:
+                if itex.startswith("url:"):
+                    url = itex.replace("url:","")
+                if itex.startswith("opt:"):
+                    output = itex.replace("opt:","")
+            if "-y" not in args and "-n" not in args:
+                printc(CYELLOW,"Download Query:")
+                query = input(f"""download {url} "y/n" ? """)
+            else:
+                if "-n" in args:
+                    query = "n"
+                if "-y" in args:
+                    query = "y"
+            if query == "y":
+                download(url,output)
+            if query == "n":
+                printc(CRED,"Aborted download")
+
+
+        elif item.startswith("@addpkg"):
+            pkg = ""
+            lang = ""
+            default = ""
+            flags = ""
+            item = item.replace("@addpkg ","")
+            item = item.split()
+            for word in item:
+                if word.startswith("pkg:"):
+                    pkg = word.replace("pkg:","")
+                if word.startswith("lang:"):
+                    lang = word.replace("lang:","")
+                if word.startswith("pm:"):
+                    default = word.replace("pm:","")
+                if word.startswith("flags:"):
+                    default = word.replace("flags:","")
+            if default != "":
+                printc(CGREEN,f"{pm} install {pkg} {flags}")
+                run(f"{pm} install {pkg} {flags}")
+            else:
+                if lang in ["py","python"]:
+                    printc(CGREEN,f"pip install {pkg} {flags}")
+                    run(f"pip install {pkg} {flags}")
+                elif lang in ["js","javascript"]:
+                    printc(CGREEN,f"npm install {pkg} {flags}")
+                    run(f"npm install {pkg} {flags}")
+                elif lang in ["deb","apt"]:
+                    print(f"apt install {pkg} {flags}")
+                    run(f"apt install {pkg} {flags}")
+
+
+
 
 
         else:
-          if xylo:
-            tex += f"\n{item}"
-          else:
-            line += 1
-            printc(CVIOLET2,f"Running line {line} of function {function}")
-            if item.startswith("@python def") == False:
-              print(CBLUE2,item)
-            if item.startswith("@q "):
-              run(item.replace("@q ",""))
-            elif item.startswith("@python "):
-              item = item.replace("@python ","")
-              if item.startswith("def"):
-                printc(CRED,"Exectuting python function!")
-                
-                item = item.replace("||","\n")
-                item = item.replace("?|?","  ")
-                printc(CGREEN,item)
-                exec(item)
-                
-              else:
-                printc(CRED,str(eval(item)))
+
+
+            if item.endswith(":") and item.startswith("func"):
+              print(CRED,f"Running function {item}")
+              function = item
+              line = 0
+
+
             else:
-              os.system(item)
+              if xylo:
+                tex += f"\n{item}"
+              else:
+                line += 1
+                printc(CVIOLET2,f"Running line {line} of {function}")
+                if item.startswith("@python def") == False and item.startswith("@dp") == False:
+                  print(CBLUE2,item)
+                if item.startswith("@dp"):
+                    item = item.replace("@dp ","")
+                if item.startswith("@q "):
+                  run(item.replace("@q ",""))
+                elif item.startswith("@python "):
+                  item = item.replace("@python ","")
+                  if item.startswith("def"):
+                    printc(CRED,"Exectuting python function!")
+
+                    item = item.replace("||","\n")
+                    item = item.replace("?|?","  ")
+                    printc(CGREEN,item)
+                    exec(str(item))
+
+                  else:
+                    printc(CRED,str(eval(item)))
+                else:
+                  os.system(item)
   elif "Makefile" in files:
     printc(CVIOLET,"Running make ...")
     run("make")
-
-
-
-
-
-
-
