@@ -26,4 +26,28 @@ echo "hi"
 # you can get the arguments given comma seperated by:
 echo "*getargs"
 # this only works if the "--sendargs" flag is used.
+# you can get the system platform by:
+echo "*getplatform"
+# you can download files too
+@dl url:https://google.com/index.html opt:index.html
+# url and output
+# you can check for required OS and unsupported OS
+@uOS win32,win64
+@reqOS darwin64
+# Seperate multiple OS's by commas
+# you can add packages, so far only supporting python, javascript and debian packages
+# LANG ALIASES
+# python - py, python
+# javascript - js, javascript
+# debian - apt, deb
+# BASIC EXAMPLE
+@addpkg lang:py pkg:pip
+# ADVANCED EXAMPLE
+# pm: allows you to pick the package manager
+@addpkg pkg:express pm:npm
+# ADVANCED EXAMPLE 2
+@addpkg pkg:pip lang:py flags:--upgrade/-v
+# seperate flags with /
+# you can also not print the contents of the line
+@dp echo "not printing contents so you can only see this"
 ```
