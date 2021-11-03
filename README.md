@@ -50,4 +50,5 @@ echo "*getplatform"
 # seperate flags with /
 # you can also not print the contents of the line
 @dp echo "not printing contents so you can only see this"
+# As you've seen, you can make comments with #
 ```
