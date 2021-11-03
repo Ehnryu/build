@@ -189,8 +189,7 @@ def default(x):
               item = item.replace("*getargs",str(argz).rstrip())
               item = item.replace("*getplatform",str(sys.platform).rstrip())
 
-              if item.startswith("@python def") == False and item.startswith("@dp") == False and item.startswith("func") == False:
-                print(CBLUE2,item)
+
               if item.startswith("@dp"):
                 item = item.replace("@dp ","")
 
@@ -207,6 +206,8 @@ def default(x):
 
 
                 shutil.copyfile(src,dest)
+
+
 
               elif item.startswith("@delf"):
                 target = ""
@@ -321,11 +322,16 @@ def default(x):
                           print(f"apt install {pkg} {flags}")
                           run(f"apt install {pkg} {flags}")
 
+              elif item.startswith("@reqSR") and func == False:
+                ok = "ok"
+
 
 
 
 
               else:
+                  if item.startswith("@reqSR") and func:
+                    item = item.replace("@reqSR ","")
 
 
                   if item.endswith(":") and item.startswith("func"):
@@ -340,6 +346,8 @@ def default(x):
                     else:
                       line += 1
                       printc(CVIOLET2,f"Running line {line} of {function}")
+                      if item.startswith("@python def") == False and item.startswith("@dp") == False and item.startswith("func") == False:
+                        print(CBLUE2,item)
 
                       if item.startswith("@q "):
                         run(item.replace("@q ",""))
