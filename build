@@ -8,7 +8,7 @@ import os
 import sys
 from sys import platform
 import json
-
+import base64
 
 from tqdm import tqdm
 import urllib.request
@@ -98,12 +98,13 @@ def printc(color,*text):
   CEND      = '\33[0m'
   print(color + text[0] + CEND)
 
-advanced = []
+
 
 def run(command):
     subprocess.check_output(command,shell=True)
 
 def build():
+    advanced = ["sendargs ="]
 
 
     argv = sys.argv[1:]
@@ -123,6 +124,8 @@ def build():
         
         if opt in ["-h","--help"]:
           send_help()
+        if opt in ["--sendargs"]:
+          return {"x":"t","args":sys.argv}
 
           
 
@@ -134,10 +137,11 @@ if x["x"] == "t":
   args = x["args"]
   argz = ""
   for item in args:
-    if item != args[len(args)-1]:
-      argz += f"{item},"
-    else:
-      argz += f"{item}"
+    if item not in ["build","build.py","main.py","--sendargs"]:
+      if item != args[len(args)-1]:
+        argz += f"{item},"
+      else:
+        argz += f"{item}"
   files = []
   for file in os.listdir(os.getcwd()):
     files.append(file)
@@ -150,37 +154,42 @@ if x["x"] == "t":
     f = open("Buildfile", "r")
     for item in f.readlines():
       item = item.rstrip()
+      if "--viewcomments" in args or "-vc" in args:
+        if item.startswith("#"):
+          printc(CBEIGE,f"COMMENT: {item}")
+      if item.startswith("#") == False:
+        item = item.replace("*getargs",str(argz).rstrip())
 
-      if item.endswith(":") and item.startswith("func"):
-        print(CRED,f"Running function {item}")
-        function = item
-        line = 0
+        if item.endswith(":") and item.startswith("func"):
+          print(CRED,f"Running function {item}")
+          function = item
+          line = 0
 
 
-      else:
-        if xylo:
-          tex += f"\n{item}"
         else:
-          line += 1
-          printc(CVIOLET2,f"Running line {line} of function {function}")
-          if item.startswith("@python def") == False:
-            print(CBLUE2,item)
-          if item.startswith("@q "):
-            run(item.replace("@q ",""))
-          elif item.startswith("@python "):
-            item = item.replace("@python ","")
-            if item.startswith("def"):
-              printc(CRED,"Exectuting python function!")
-              item = item.replace("*getargs",str(args).rstrip())
-              item = item.replace("||","\n")
-              item = item.replace("?|?","  ")
-              printc(CGREEN,item)
-              exec(item)
-              
-            else:
-              printc(CRED,str(eval(item)))
+          if xylo:
+            tex += f"\n{item}"
           else:
-            os.system(item)
+            line += 1
+            printc(CVIOLET2,f"Running line {line} of function {function}")
+            if item.startswith("@python def") == False:
+              print(CBLUE2,item)
+            if item.startswith("@q "):
+              run(item.replace("@q ",""))
+            elif item.startswith("@python "):
+              item = item.replace("@python ","")
+              if item.startswith("def"):
+                printc(CRED,"Exectuting python function!")
+                
+                item = item.replace("||","\n")
+                item = item.replace("?|?","  ")
+                printc(CGREEN,item)
+                exec(item)
+                
+              else:
+                printc(CRED,str(eval(item)))
+            else:
+              os.system(item)
   elif "Makefile" in files:
     printc(CVIOLET,"Running make ...")
     run("make")
