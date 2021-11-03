@@ -216,7 +216,8 @@ if x["x"] == "t":
                 if word.startswith("pm:"):
                     default = word.replace("pm:","")
                 if word.startswith("flags:"):
-                    default = word.replace("flags:","")
+                    flags = word.replace("flags:","")
+                    flags = flags.replace("/"," ")
             if default != "":
                 printc(CGREEN,f"{pm} install {pkg} {flags}")
                 run(f"{pm} install {pkg} {flags}")
