@@ -54,6 +54,18 @@ echo "*getplatform"
 # seperate flags with /
 # you can also not print the contents of the line
 @dp echo "not printing contents so you can only see this"
+# you can copy files
+@cp src:tocopy.txt dest:../tocopy.txt
+# you can move files
+@mv src:tocopy.txt dest:movedfile.txt
+# you can rename files
+@rename src:tocopy.txt target:renamedfile.txt
+# you can delete files
+@delf target:todelete.txt
+# you can delete folders
+@deld target:toremove
+# you can create files
+@create name:tocreate.txt
 # As you've seen, you can make comments with #
 # While not needed for --build this is needed to run specific functions:
 \endfunc
