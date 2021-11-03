@@ -9,6 +9,10 @@ Download the binary from here and send it to `/bin` (linux) or `C:\Windows\Syste
 For linux you also need to type `chmod +x /bin/build`
 
 ### Usage:
+To run Buildfile simply type `build --build`
+
+To run a specified function type `build -r <function>`
+
 Create a file called `Buildfile` (caps matters)
 and input the following:
 ```
@@ -51,4 +55,10 @@ echo "*getplatform"
 # you can also not print the contents of the line
 @dp echo "not printing contents so you can only see this"
 # As you've seen, you can make comments with #
+# While not needed for --build this is needed to run specific functions:
+\endfunc
+func run_me_only:
+echo "You ran me only"
+\endfunc
+# type "build -r run_me_only <args>" to only run that function
 ```
