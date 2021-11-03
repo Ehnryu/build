@@ -66,7 +66,10 @@ echo "*getplatform"
 @deld target:toremove
 # you can create files
 @create name:tocreate.txt
+# you can specify that the command has to be used with -r
+@reqSR echo "ran only with this function alone"
 # As you've seen, you can make comments with #
+# You can view comments by using -vc or --viewcomments eg. build --build -vc
 # While not needed for --build this is needed to run specific functions:
 \endfunc
 func run_me_only:
