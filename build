@@ -9,6 +9,7 @@ import sys
 from sys import platform
 import json
 import base64
+import shutil
 
 from tqdm import tqdm
 import urllib.request
@@ -140,7 +141,6 @@ def build():
 x = build()
 
 def default(x):
-  print(x)
   if x != None:
     if x["x"] == "t":
       args = x["args"]
@@ -161,7 +161,6 @@ def default(x):
         function = ""
         printc(CVIOLET,"Running build ...")
         f = open("Buildfile", "r")
-        print(x)
         try:
           func = x["func"]
         except KeyError:
@@ -190,13 +189,78 @@ def default(x):
               item = item.replace("*getargs",str(argz).rstrip())
               item = item.replace("*getplatform",str(sys.platform).rstrip())
 
-              if item.startswith("@reqOS"):
+              if item.startswith("@python def") == False and item.startswith("@dp") == False and item.startswith("func") == False:
+                print(CBLUE2,item)
+              if item.startswith("@dp"):
+                item = item.replace("@dp ","")
+
+              if item.startswith("@cp"):
+                src = ""
+                dest = ""
+                itemz = item.replace("@cp ","")
+                itemz = item.split()
+                for word in itemz:
+                  if word.startswith("src:"):
+                    src = word.replace("src:","")
+                  if word.startswith("dest:"):
+                    dest = word.replace("dest:","")
+
+
+                shutil.copyfile(src,dest)
+
+              elif item.startswith("@delf"):
+                target = ""
+                itemz = item.replace("@delf ","")
+                itemz = item.split()
+                for word in itemz:
+                  if word.startswith("target:"):
+                    target = word.replace("target:","")
+                os.remove(target)
+
+              elif item.startswith("@deld"):
+                target = ""
+                itemz = item.replace("@deld ","")
+                itemz = item.split()
+                for word in itemz:
+                  if word.startswith("target:"):
+                    target = word.replace("target:","")
+                shutil.rmtree(target)
+            
+
+              elif item.startswith("@mv"):
+                src = ""
+                dest = ""
+                itemz = item.replace("@mv ","")
+                itemz = item.split()
+                for word in itemz:
+                  if word.startswith("src:"):
+                    src = word.replace("src:","")
+                  if word.startswith("dest:"):
+                    dest = word.replace("dest:","")
+
+                shutil.move(src,dest)
+
+              elif item.startswith("@rename"):
+                src = ""
+                dest = ""
+                item = item.replace("@rename ","")
+                item = item.split()
+                for word in item:
+                  if word.startswith("src:"):
+                    src = word.replace("src:","")
+                  if word.startswith("target:"):
+                    dest = word.replace("target:","")
+
+                shutil.move(src, dest)
+
+
+              elif item.startswith("@reqOS"):
                   item = item.replace("@reqOS ","")
                   item = item.split(",")
                   if sys.platform not in item:
                       raise RuntimeError(f"OS not supported. RequiredOS: {item} YourOS: {sys.platform}")
 
-              if item.startswith("@uOS"):
+              elif item.startswith("@uOS"):
                   item = item.replace("@uOS ","")
                   item = item.split(",")
                   if sys.platform in item:
@@ -206,8 +270,8 @@ def default(x):
                   url = ""
                   output = ""
                   item = item.replace("@dl ","")
-                  item = item.split()
-                  for itex in item:
+                  itemz = item.split()
+                  for itex in itemz:
                       if itex.startswith("url:"):
                           url = itex.replace("url:","")
                       if itex.startswith("opt:"):
@@ -232,8 +296,8 @@ def default(x):
                   default = ""
                   flags = ""
                   item = item.replace("@addpkg ","")
-                  item = item.split()
-                  for word in item:
+                  itemz = item.split()
+                  for word in itemz:
                       if word.startswith("pkg:"):
                           pkg = word.replace("pkg:","")
                       if word.startswith("lang:"):
@@ -276,10 +340,7 @@ def default(x):
                     else:
                       line += 1
                       printc(CVIOLET2,f"Running line {line} of {function}")
-                      if item.startswith("@python def") == False and item.startswith("@dp") == False:
-                        print(CBLUE2,item)
-                      if item.startswith("@dp"):
-                          item = item.replace("@dp ","")
+
                       if item.startswith("@q "):
                         run(item.replace("@q ",""))
                       elif item.startswith("@python "):
