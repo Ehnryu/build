@@ -1,18 +1,28 @@
 #!/usr/bin/env python3
-import argparse
-import time
-import sys
-import getopt
-import subprocess
 import os
-import sys
-from sys import platform
-import json
-import base64
-import shutil
+try:
+  import argparse
+  import time
+  import sys
+  import getopt
+  import subprocess
 
-from tqdm import tqdm
-import urllib.request
+  import sys
+  from sys import platform
+  import json
+  import base64
+  import shutil
+
+  from tqdm import tqdm
+  import urllib.request
+except:
+  print("Installing dependencies of build...")
+  os.system("pip install tqdm")
+  os.system("pip install getopt")
+  os.system("pip install argparse")
+
+vars = {}
+
 
 def download(url, filename):
     import functools
@@ -173,27 +183,41 @@ def default(x):
             if s == False:
               cs = False
               
-              if item.lower().rstrip() == (f"func {func}:"):
+              if item.lower().rstrip() == (f"@function {func}:"):
                 cs = True
                 s = True
           if cs:
+            iten = item
             item = item.rstrip()
             if "--viewcomments" in args or "-vc" in args:
               if item.startswith("#"):
                 printc(CBEIGE,f"COMMENT: {item}")
             if item.startswith("\endfunc"):
-                printc(CGREEN,f"END OF FUNCTION: {function}")
+                printc(CGREEN,f"END OF : {function}")
                 if func:
                   return printc(CGREEN,"FINISHED RUNNING FUNCTION!")
             if item.startswith("#") == False and item.startswith("\endfunc") == False:
               item = item.replace("*getargs",str(argz).rstrip())
               item = item.replace("*getplatform",str(sys.platform).rstrip())
+              item = item.replace("*getvars",str(vars))
+
+
+              lzma = False
+              dp = False
+
+              
 
 
               if item.startswith("@dp"):
+                dp = True
                 item = item.replace("@dp ","")
 
+              for d in vars:
+                item = item.replace(d,vars[d])
+                iten = iten.replace(d,vars[d])
+
               if item.startswith("@cp"):
+                lzma = True
                 src = ""
                 dest = ""
                 itemz = item.replace("@cp ","")
@@ -207,9 +231,38 @@ def default(x):
 
                 shutil.copyfile(src,dest)
 
+              elif item.startswith("@var"):
+                
+                itez = item.replace("@var ","")
+                itex = itez.split("=")
+                itez = itez.replace(itex[0],"")
+                itez = itez.split(" ",1)
+                itex[0] = itex[0].replace(" ","")
+                vars[f"*{itex[0]}"] = itez[1]
+                print(f"Variable {itex[0]} added")
+
+              elif item.startswith("@input"):
+                iten = iten.replace("\n","")
+
+                
+                iten = iten.replace("@input ","")
+                pointer = ""
+                tbi = ""
+                itex = iten.split(" ",1)
+                for word in itex:
+                  if word.startswith("point:"):
+                    pointer = word.replace("point:","")
+                    tbi = iten.replace(f"point:{pointer} query:","")
+                query = input(tbi)
+                vars[f"*{pointer}"] = query
+
+                
+                
+
 
 
               elif item.startswith("@delf"):
+                lzma = True
                 target = ""
                 itemz = item.replace("@delf ","")
                 itemz = item.split()
@@ -219,6 +272,7 @@ def default(x):
                 os.remove(target)
 
               elif item.startswith("@deld"):
+                lzma = True
                 target = ""
                 itemz = item.replace("@deld ","")
                 itemz = item.split()
@@ -226,9 +280,20 @@ def default(x):
                   if word.startswith("target:"):
                     target = word.replace("target:","")
                 shutil.rmtree(target)
+
+              elif item.startswith("@create"):
+                lzma = True
+                target = ""
+                itemz = item.replace("@create ","")
+                itemz = item.split()
+                for word in itemz:
+                  if word.startswith("name:"):
+                    target = word.replace("name:","")
+                os.system(f"touch {target}")
             
 
               elif item.startswith("@mv"):
+                lzma = True
                 src = ""
                 dest = ""
                 itemz = item.replace("@mv ","")
@@ -242,6 +307,7 @@ def default(x):
                 shutil.move(src,dest)
 
               elif item.startswith("@rename"):
+                lzma = True
                 src = ""
                 dest = ""
                 item = item.replace("@rename ","")
@@ -256,18 +322,21 @@ def default(x):
 
 
               elif item.startswith("@reqOS"):
-                  item = item.replace("@reqOS ","")
-                  item = item.split(",")
-                  if sys.platform not in item:
-                      raise RuntimeError(f"OS not supported. RequiredOS: {item} YourOS: {sys.platform}")
+                lzma = True
+                item = item.replace("@reqOS ","")
+                item = item.split(",")
+                if sys.platform not in item:
+                    raise RuntimeError(f"OS not supported. RequiredOS: {item} YourOS: {sys.platform}")
 
               elif item.startswith("@uOS"):
+                  lzma = True
                   item = item.replace("@uOS ","")
                   item = item.split(",")
                   if sys.platform in item:
                       raise RuntimeError(f"OS not supported. UnsupportedOS: {item} YourOS: {sys.platform}")
 
               elif item.startswith("@dl"):
+                  lzma = True
                   url = ""
                   output = ""
                   item = item.replace("@dl ","")
@@ -292,6 +361,7 @@ def default(x):
 
 
               elif item.startswith("@addpkg"):
+                  lzma = True
                   pkg = ""
                   lang = ""
                   default = ""
@@ -323,8 +393,8 @@ def default(x):
                           run(f"apt install {pkg} {flags}")
 
               elif item.startswith("@reqSR") and func == False:
+                lzma = True
                 ok = "ok"
-
 
 
 
@@ -334,7 +404,8 @@ def default(x):
                     item = item.replace("@reqSR ","")
 
 
-                  if item.endswith(":") and item.startswith("func"):
+
+                  if item.endswith(":") and item.startswith("@function"):
                     print(CRED,f"Running {item}")
                     function = item
                     line = 0
@@ -346,14 +417,15 @@ def default(x):
                     else:
                       line += 1
                       printc(CVIOLET2,f"Running line {line} of {function}")
-                      if item.startswith("@python def") == False and item.startswith("@dp") == False and item.startswith("func") == False:
+                      if item.startswith("@python def") == False and dp == False and item.startswith("@function") == False:
                         print(CBLUE2,item)
 
                       if item.startswith("@q "):
                         run(item.replace("@q ",""))
                       elif item.startswith("@python "):
                         item = item.replace("@python ","")
-                        if item.startswith("def"):
+                        if item.startswith("def") or item.startswith("@exec"):
+                          item = item.replace("@exec ","")
                           printc(CRED,"Exectuting python function!")
 
                           item = item.replace("||","\n")
@@ -362,9 +434,13 @@ def default(x):
                           exec(str(item))
 
                         else:
+                          item = item.replace("||","\n")
+                          item = item.replace("?|?","  ")
                           printc(CRED,str(eval(item)))
                       else:
                         os.system(item)
+              if lzma and item.startswith("@dp") == False:
+                print(CBLUE2,item)
       elif "Makefile" in files:
         printc(CVIOLET,"Running make ...")
         run("make")
