@@ -16,7 +16,7 @@ To run a specified function type `build -r <function>`
 Create a file called `Buildfile` (caps matters)
 and input the following:
 ```
-func hello_world:
+@function hello_world:
 # you can use bash in the Buildfile:
 echo "hi"
 # you can perform silent commands
@@ -68,11 +68,21 @@ echo "*getplatform"
 @create name:tocreate.txt
 # you can specify that the command has to be used with -r
 @reqSR echo "ran only with this function alone"
+# you can make variables
+@var x = 1
+# you can call variables
+echo "*x"
+# you can get the variables in json
+echo "*getvars"
+# you can get input
+@input point:z query:What is your name?
+# you can call input
+echo "Hello, *z my name is build template"
 # As you've seen, you can make comments with #
 # You can view comments by using -vc or --viewcomments eg. build --build -vc
 # While not needed for --build this is needed to run specific functions:
 \endfunc
-func run_me_only:
+@function run_me_only:
 echo "You ran me only"
 \endfunc
 # type "build -r run_me_only <args>" to only run that function
