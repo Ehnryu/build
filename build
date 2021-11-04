@@ -439,7 +439,7 @@ def default(x):
                           printc(CRED,str(eval(item)))
                       else:
                         os.system(item)
-              if lzma and item.startswith("@dp") == False:
+              if lzma and dp == False:
                 print(CBLUE2,item)
       elif "Makefile" in files:
         printc(CVIOLET,"Running make ...")
